@@ -231,7 +231,6 @@ function lload(){
   // Load avatar separately
   try{const av=localStorage.getItem("fd_avatar");if(av)profile.avatar=av;}catch(e){}
 }
-}
 function lsave(){
   try{if(profile.avatar)localStorage.setItem("fd_avatar",profile.avatar);}catch(e){}
   const pna={...profile,avatar:""};
