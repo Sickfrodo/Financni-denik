@@ -512,7 +512,9 @@ function rAddCat(){
   <div style="margin-bottom:14px"><div class="form-label">Název</div><input class="form-input" id="cat-name-input" type="text" placeholder="Název kategorie" value="${esc(nCat.name)}" oninput="nCat.name=this.value;updCatP()" /></div>
   <div style="margin-bottom:14px"><div class="form-label">Ikona</div><div class="emoji-grid">${eH}</div></div>
   <div style="margin-bottom:24px"><div class="form-label">Barva</div><div class="color-grid">${cH}</div></div>
-  <button class="submit-btn" onclick="subCat()" style="background:${ok?nCat.color:"#2a2a35"};opacity:${ok?1:0.6}">${editCatId?"ULOŽIT ZMĚNY":"PŘIDAT KATEGORII"}</button>`;
+  <button class="submit-btn" id="cat-submit-btn" style="background:${ok?nCat.color:'#2a2a35'};opacity:${ok?1:0.6}">${editCatId?'ULOŽIT ZMĚNY':'PŘIDAT KATEGORII'}</button>`;
+  document.getElementById("cat-submit-btn").addEventListener("click", window.subCat);
+  document.getElementById("cat-name-input").addEventListener("keydown", e=>{if(e.key==="Enter")window.subCat();});
 }
 
 function rAddPay(){
@@ -587,10 +589,31 @@ window.delIncome=function(m,id){if(!incomes[m])return;incomes[m]=incomes[m].filt
 window.openAddCat=function(){editCatId=null;nCat={name:"",emoji:"🛒",color:"#3498db"};view="addCat";render();};
 window.cancelAddCat=function(){editCatId=null;view="main";render();};
 window.editCat=function(id){const c=cats.find(x=>x.id===id);if(!c)return;editCatId=id;nCat={name:c.name,emoji:c.emoji,color:c.color};view="addCat";render();};
-window.selEm=function(em){nCat.emoji=em;rAddCat();};
-window.selCol=function(col){nCat.color=col;rAddCat();};
+window.selEm=function(em){
+  const inp=document.getElementById('cat-name-input');if(inp)nCat.name=inp.value;
+  nCat.emoji=em;
+  // Update only emoji grid highlights without full re-render
+  document.querySelectorAll('.emoji-opt').forEach(b=>{
+    const isMe=b.textContent===em;
+    b.style.borderColor=isMe?nCat.color:'transparent';
+    b.style.background=isMe?'#2a2a35':'transparent';
+  });
+  const prev=document.getElementById('cat-pname');if(prev)prev.textContent=nCat.name||'Název...';
+  const previewCard=document.querySelector('.preview-card');if(previewCard){previewCard.style.background=nCat.color;previewCard.style.boxShadow='0 0 20px '+nCat.color+'55';}
+  const previewEmoji=document.querySelector('.preview-card div:first-child');if(previewEmoji)previewEmoji.textContent=em;
+};
+window.selCol=function(col){
+  const inp=document.getElementById('cat-name-input');if(inp)nCat.name=inp.value;
+  nCat.color=col;
+  document.querySelectorAll('.color-dot').forEach(d=>{d.style.borderColor=d.style.background===col?'#fff':'transparent';});
+  const previewCard=document.querySelector('.preview-card');if(previewCard){previewCard.style.background=col;previewCard.style.boxShadow='0 0 20px '+col+'55';}
+  const btn=document.querySelector('.submit-btn');if(btn&&nCat.name.trim()){btn.style.background=col;}
+  // Update emoji opt borders to new color
+  document.querySelectorAll('.emoji-opt').forEach(b=>{if(b.textContent===nCat.emoji)b.style.borderColor=col;});
+};
 window.updCatP=function(){const el=document.getElementById("cat-pname");if(el)el.textContent=nCat.name||"Název...";const btn=document.querySelector(".submit-btn");if(btn){btn.style.background=nCat.name.trim()?nCat.color:"#2a2a35";btn.style.opacity=nCat.name.trim()?"1":"0.6";}};
 window.subCat=function(){
+  const inp=document.getElementById('cat-name-input');if(inp)nCat.name=inp.value;
   if(!nCat.name.trim())return;
   if(editCatId){cats=cats.map(c=>c.id===editCatId?{...c,name:nCat.name.trim(),emoji:nCat.emoji,color:nCat.color}:c);editCatId=null;}
   else cats.push({id:Date.now().toString(),name:nCat.name.trim(),emoji:nCat.emoji,color:nCat.color});
