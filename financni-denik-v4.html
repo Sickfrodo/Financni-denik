@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Finanční deník" />
+  <meta name="theme-color" content="#0f0f13" />
+  <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDI0IDEwMjQiPgogIDxyZWN0IHdpZHRoPSIxMDI0IiBoZWlnaHQ9IjEwMjQiIHJ4PSIyMzAiIGZpbGw9IiMwZjBmMTMiLz4KICA8IS0tIHdhbGxldCBib2R5IC0tPgogIDxyZWN0IHg9IjEyMCIgeT0iMzEwIiB3aWR0aD0iNzg0IiBoZWlnaHQ9IjUwMCIgcng9IjcwIiBmaWxsPSJub25lIiBzdHJva2U9IiNmMGVkZTgiIHN0cm9rZS13aWR0aD0iNTIiLz4KICA8IS0tIHdhbGxldCBmbGFwIHRvcCBzdHJpcGUgLS0+CiAgPHJlY3QgeD0iMTIwIiB5PSI0MjAiIHdpZHRoPSI3ODQiIGhlaWdodD0iOTAiIGZpbGw9IiNmMGVkZTgiLz4KICA8IS0tIGNvaW4gc2xvdCBjaXJjbGUgLS0+CiAgPHJlY3QgeD0iNTgwIiB5PSI1NzAiIHdpZHRoPSIyMjAiIGhlaWdodD0iMTMwIiByeD0iNjUiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2YwZWRlOCIgc3Ryb2tlLXdpZHRoPSI0NCIvPgogIDwhLS0gY29pbiBkb3QgLS0+CiAgPGNpcmNsZSBjeD0iNjkwIiBjeT0iNjM1IiByPSIyOCIgZmlsbD0iI2YwZWRlOCIvPgogIDwhLS0gc3RyYXAgdG9wIC0tPgogIDxyZWN0IHg9IjM3MCIgeT0iMTgwIiB3aWR0aD0iMjg0IiBoZWlnaHQ9IjE2MCIgcng9IjUwIiBmaWxsPSIjMGYwZjEzIiBzdHJva2U9IiNmMGVkZTgiIHN0cm9rZS13aWR0aD0iNTIiLz4KICA8IS0tIHNtYWxsIGNvbG9yZWQgZG90cyBib3R0b20gbGVmdCAtLT4KICA8Y2lyY2xlIGN4PSIyNDAiIGN5PSI2MzAiIHI9IjQyIiBmaWxsPSIjZTc0YzNjIi8+CiAgPGNpcmNsZSBjeD0iMzYwIiBjeT0iNjMwIiByPSI0MiIgZmlsbD0iI2U2N2UyMiIvPgogIDxjaXJjbGUgY3g9IjQ4MCIgY3k9IjYzMCIgcj0iNDIiIGZpbGw9IiMyZWNjNzEiLz4KPC9zdmc+" />
+  <title>Finanční deník</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    html, body { height: 100%; background: #0f0f13; overscroll-behavior: none; }
+    body { font-family: 'Georgia', 'Times New Roman', serif; color: #f0ede8; }
+    #app { max-width: 480px; margin: 0 auto; min-height: 100vh; min-height: -webkit-fill-available; display: flex; flex-direction: column; }
+
+    input, button, select, textarea { font-family: inherit; }
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: #1a1a22; }
+    ::-webkit-scrollbar-thumb { background: #444; border-radius: 2px; }
+
+    @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.08); } 100% { transform: scale(1); } }
+    @keyframes slideUp { from { transform: translateY(16px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    @keyframes successAnim { 0% { opacity: 0; transform: translate(-50%,-50%) scale(0.5); } 50% { opacity: 1; transform: translate(-50%,-50%) scale(1.2); } 100% { opacity: 0; transform: translate(-50%,-50%) scale(1); } }
+
+    .cat-btn { transition: transform 0.15s; }
+    .cat-btn:active { transform: scale(0.94); }
+    .slide-up { animation: slideUp 0.25s ease; }
+
+    /* NAV TABS */
+    #nav { display: flex; background: #0f0f13; border-bottom: 1px solid #2a2a35; flex-shrink: 0; }
+    .nav-tab { flex: 1; padding: 10px 4px 8px; text-align: center; cursor: pointer; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: #555; border: none; background: none; border-bottom: 2px solid transparent; transition: color 0.2s; }
+    .nav-tab.active { color: #f0ede8; border-bottom-color: #f0ede8; }
+    .nav-tab-icon { font-size: 18px; display: block; margin-bottom: 2px; }
+
+    /* Header */
+    #header { padding: 48px 20px 12px; border-bottom: 1px solid #2a2a35; flex-shrink: 0; }
+    .header-row { display: flex; justify-content: space-between; align-items: center; }
+    .header-label { font-size: 10px; letter-spacing: 3px; color: #888; text-transform: uppercase; }
+    .header-date { font-size: 19px; font-weight: bold; margin-top: 3px; }
+    .btn-pill { border: none; border-radius: 20px; padding: 7px 14px; cursor: pointer; font-size: 12px; }
+    .stats-row { display: flex; gap: 10px; margin-top: 10px; }
+    .stat-box { background: #1a1a22; border-radius: 10px; padding: 8px 14px; flex: 1; text-align: center; }
+    .stat-label { font-size: 9px; color: #888; letter-spacing: 2px; text-transform: uppercase; }
+    .stat-value { font-size: 17px; font-weight: bold; margin-top: 2px; }
+
+    /* Scrollable content */
+    #content { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 16px 20px 60px; }
+
+    .section-label { font-size: 9px; color: #888; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; }
+
+    /* Category grid */
+    .cat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+    .cat-card { border-radius: 14px; padding: 12px 12px 10px; text-align: left; cursor: pointer; position: relative; }
+    .cat-emoji { font-size: 24px; }
+    .cat-name { font-size: 12px; font-weight: bold; margin-top: 4px; }
+    .cat-total { font-size: 11px; margin-top: 1px; }
+    .cat-actions { position: absolute; top: 7px; right: 7px; display: flex; gap: 4px; }
+    .cat-action-btn { background: none; border: none; font-size: 12px; cursor: pointer; padding: 2px; }
+
+    /* Budget progress on card */
+    .cat-progress-wrap { margin-top: 6px; }
+    .cat-progress-bg { background: rgba(0,0,0,0.3); border-radius: 3px; height: 4px; overflow: hidden; }
+    .cat-progress-fill { height: 100%; border-radius: 3px; transition: width 0.4s ease; }
+    .cat-remaining { font-size: 10px; margin-top: 3px; }
+
+    /* Input panel */
+    #input-panel { background: #1a1a22; border-radius: 16px; padding: 16px; margin-bottom: 16px; animation: slideUp 0.2s ease; }
+    .input-panel-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+    .input-panel-emoji { font-size: 22px; }
+    .input-panel-name { font-weight: bold; font-size: 15px; }
+    .amount-wrap { position: relative; margin-bottom: 8px; }
+    .amount-input { width: 100%; background: #0f0f13; border-radius: 10px; padding: 13px 40px 13px 14px; color: #f0ede8; font-size: 22px; outline: none; -webkit-appearance: none; }
+    .amount-unit { position: absolute; right: 13px; top: 50%; transform: translateY(-50%); color: #888; font-size: 13px; }
+    .note-input { width: 100%; background: #0f0f13; border: 1px solid #2a2a35; border-radius: 10px; padding: 10px 14px; color: #f0ede8; font-size: 14px; outline: none; margin-bottom: 10px; }
+    .save-btn { width: 100%; border: none; border-radius: 10px; padding: 14px; color: #fff; font-size: 15px; font-weight: bold; cursor: pointer; letter-spacing: 1px; -webkit-appearance: none; }
+
+    /* Success overlay */
+    #success-overlay { display: none; position: fixed; top: 50%; left: 50%; font-size: 64px; pointer-events: none; z-index: 999; transform: translate(-50%, -50%); }
+    #success-overlay.show { display: block; animation: successAnim 0.8s ease forwards; }
+
+    /* Expense rows */
+    .expense-row { display: flex; align-items: center; background: #1a1a22; border-radius: 10px; padding: 10px 14px; margin-bottom: 6px; }
+    .expense-emoji { font-size: 18px; margin-right: 10px; flex-shrink: 0; }
+    .expense-info { flex: 1; min-width: 0; }
+    .expense-cat { font-size: 13px; }
+    .expense-note { font-size: 11px; color: #666; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .expense-amount { font-size: 15px; font-weight: bold; flex-shrink: 0; margin-left: 8px; }
+    .del-btn { background: none; border: none; color: #444; font-size: 15px; cursor: pointer; margin-left: 8px; padding: 4px; flex-shrink: 0; }
+
+    .add-cat-card { background: transparent; border: 2px dashed #2a2a35; border-radius: 14px; padding: 14px 12px; text-align: left; cursor: pointer; color: #555; }
+
+    .back-btn { background: #2a2a35; border: none; border-radius: 8px; padding: 7px 14px; color: #f0ede8; cursor: pointer; font-size: 13px; }
+
+    /* Summary */
+    .summary-total-box { background: #1a1a22; border-radius: 16px; padding: 20px; margin-bottom: 16px; text-align: center; }
+    .summary-total-label { font-size: 10px; color: #888; letter-spacing: 3px; text-transform: uppercase; }
+    .summary-total-val { font-size: 34px; font-weight: bold; margin-top: 4px; }
+    .summary-total-count { font-size: 12px; color: #666; margin-top: 2px; }
+    .cat-summary-row { background: #1a1a22; border-radius: 12px; padding: 12px 16px; margin-bottom: 8px; }
+    .cat-summary-top { display: flex; align-items: center; margin-bottom: 8px; }
+    .progress-bg { background: #0f0f13; border-radius: 4px; height: 6px; overflow: hidden; }
+    .progress-fill { height: 100%; border-radius: 4px; transition: width 0.5s ease; }
+    .all-expense-row { display: flex; align-items: center; padding: 8px 0; border-bottom: 1px solid #2a2a35; }
+    .all-expense-meta { font-size: 10px; color: #555; margin-top: 1px; }
+    .month-select { background: #1a1a22; border: 1px solid #2a2a35; border-radius: 8px; padding: 7px 10px; color: #f0ede8; cursor: pointer; font-size: 13px; -webkit-appearance: none; }
+
+    /* Add category form */
+    .preview-card { border-radius: 14px; padding: 16px 14px; display: inline-block; min-width: 120px; margin-bottom: 20px; }
+    .form-label { font-size: 10px; color: #888; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px; }
+    .form-input { width: 100%; background: #1a1a22; border: 1px solid #2a2a35; border-radius: 10px; padding: 12px 14px; color: #f0ede8; font-size: 16px; outline: none; -webkit-appearance: none; }
+    .emoji-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+    .emoji-opt { font-size: 22px; background: transparent; border: 2px solid transparent; border-radius: 8px; padding: 4px 5px; cursor: pointer; }
+    .color-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+    .color-dot { width: 32px; height: 32px; border-radius: 50%; border: 3px solid transparent; cursor: pointer; flex-shrink: 0; }
+    .submit-btn { width: 100%; border: none; border-radius: 12px; padding: 14px; color: #fff; font-size: 15px; font-weight: bold; cursor: pointer; letter-spacing: 1px; -webkit-appearance: none; margin-bottom: 20px; }
+
+    /* Budget toggle */
+    .toggle-row { display: flex; align-items: center; justify-content: space-between; background: #1a1a22; border-radius: 10px; padding: 12px 14px; margin-bottom: 10px; }
+    .toggle-label { font-size: 14px; }
+    .toggle { position: relative; width: 44px; height: 26px; flex-shrink: 0; }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider { position: absolute; inset: 0; background: #333; border-radius: 13px; transition: 0.3s; cursor: pointer; }
+    .toggle-slider:before { content: ""; position: absolute; width: 20px; height: 20px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: 0.3s; }
+    input:checked + .toggle-slider { background: #2ecc71; }
+    input:checked + .toggle-slider:before { transform: translateX(18px); }
+
+    /* PLATBY TAB */
+    .payment-item { background: #1a1a22; border-radius: 12px; padding: 14px 16px; margin-bottom: 8px; display: flex; align-items: center; gap: 12px; }
+    .payment-check { width: 28px; height: 28px; border-radius: 50%; border: 2px solid #444; background: transparent; flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; transition: all 0.2s; }
+    .payment-check.paid { background: #2ecc71; border-color: #2ecc71; }
+    .payment-info { flex: 1; min-width: 0; }
+    .payment-name { font-size: 14px; font-weight: bold; }
+    .payment-amount { font-size: 12px; color: #888; margin-top: 2px; }
+    .payment-right { text-align: right; flex-shrink: 0; }
+    .payment-val { font-size: 15px; font-weight: bold; }
+    .payment-status { font-size: 10px; margin-top: 2px; }
+
+    .payments-summary { background: #1a1a22; border-radius: 14px; padding: 16px; margin-bottom: 16px; }
+    .payments-summary-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .payments-summary-row:last-child { margin-bottom: 0; padding-top: 8px; border-top: 1px solid #2a2a35; }
+
+    /* Modal */
+    #modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); align-items: center; justify-content: center; z-index: 500; }
+    #modal.show { display: flex; }
+    .modal-box { background: #1a1a22; border-radius: 16px; padding: 24px; margin: 20px; text-align: center; width: 100%; max-width: 320px; }
+    .modal-icon { font-size: 24px; margin-bottom: 8px; }
+    .modal-text { margin-bottom: 16px; line-height: 1.5; }
+    .modal-btns { display: flex; gap: 10px; }
+    .modal-cancel { flex: 1; background: #2a2a35; border: none; border-radius: 8px; padding: 11px; color: #f0ede8; cursor: pointer; font-size: 14px; }
+    .modal-confirm { flex: 1; background: #e74c3c; border: none; border-radius: 8px; padding: 11px; color: #fff; cursor: pointer; font-size: 14px; }
+
+    /* Add payment form */
+    .add-payment-form { background: #1a1a22; border-radius: 14px; padding: 16px; margin-bottom: 16px; animation: slideUp 0.2s ease; }
+  </style>
+</head>
+<body>
+<div id="app">
+  <div id="header">
+    <div class="header-row">
+      <div>
+        <div class="header-label">Finanční deník</div>
+        <div class="header-date" id="header-date">—</div>
+      </div>
+      <button class="btn-pill" id="btn-summary" onclick="toggleSummary()">📊 Přehled</button>
+    </div>
+    <div class="stats-row">
+      <div class="stat-box">
+        <div class="stat-label">Tento měsíc</div>
+        <div class="stat-value" id="stat-month">0 Kč</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Dnes</div>
+        <div class="stat-value" id="stat-today">0 Kč</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="nav">
+    <button class="nav-tab active" id="tab-vydaje" onclick="switchTab('vydaje')">
+      <span class="nav-tab-icon">💸</span>Výdaje
+    </button>
+    <button class="nav-tab" id="tab-platby" onclick="switchTab('platby')">
+      <span class="nav-tab-icon">🏦</span>Platby
+    </button>
+    <button class="nav-tab" id="tab-plan" onclick="switchTab('plan')">
+      <span class="nav-tab-icon">🎯</span>Plán
+    </button>
+  </div>
+
+  <div id="content"></div>
+</div>
+
+<div id="success-overlay">✅</div>
+
+<div id="modal">
+  <div class="modal-box">
+    <div class="modal-icon" id="modal-icon">⚠️</div>
+    <div class="modal-text" id="modal-text">Opravdu smazat?</div>
+    <div class="modal-btns">
+      <button class="modal-cancel" onclick="closeModal()">Zrušit</button>
+      <button class="modal-confirm" id="modal-confirm-btn">Smazat</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const EMOJI_OPTIONS = ["🍕","🍔","🛒","🍺","☕","⛽","🚗","🚬","🏠","💊","👕","🎮","✈️","🎁","💄","📱","🎵","🐾","💪","📚","🍷","🌿","🔧","💻","🎬","🏋️","🧴","🛍️","🏥","🎯"];
+const COLOR_OPTIONS = ["#e74c3c","#e67e22","#f1c40f","#2ecc71","#1abc9c","#3498db","#2980b9","#9b59b6","#8e44ad","#fd79a8","#00b894","#6c5ce7","#a29bfe","#fab1a0","#55efc4","#636e72"];
+
+const DEFAULT_CATEGORIES = [
+  { id: "jidlo", name: "Jídlo", emoji: "🍕", color: "#e74c3c" },
+  { id: "nafta", name: "Nafta", emoji: "⛽", color: "#e67e22" },
+  { id: "cigarety", name: "Cigarety", emoji: "🚬", color: "#8e44ad" },
+  { id: "platby", name: "Platby", emoji: "🏠", color: "#2980b9" },
+];
+
+const DEFAULT_PAYMENTS = [
+  { id: "najem", name: "Nájem", emoji: "🏠", amount: 0 },
+  { id: "elektrika", name: "Elektrika", emoji: "⚡", amount: 0 },
+  { id: "telefon", name: "Telefon", emoji: "📱", amount: 0 },
+  { id: "internet", name: "Internet", emoji: "🌐", amount: 0 },
+  { id: "twisto", name: "Twisto", emoji: "💳", amount: 0 },
+  { id: "pujcka", name: "Půjčka", emoji: "🏦", amount: 0 },
+];
+
+let categories = loadJSON("fd_categories", DEFAULT_CATEGORIES);
+let expenses = loadJSON("fd_expenses", {});
+let budgets = loadJSON("fd_budgets", {}); // { catId: { enabled: bool, limit: number } }
+let payments = loadJSON("fd_payments", DEFAULT_PAYMENTS); // definitions
+let paymentStatus = loadJSON("fd_payment_status", {}); // { monthKey: { paymentId: bool } }
+
+let view = "main"; // main | summary | addCategory | addPayment | editPayment
+let activeTab = "vydaje"; // vydaje | platby | plan
+let activeCategory = null;
+let editingCategoryId = null;
+let editingPaymentId = null;
+let newCat = { name: "", emoji: "🛒", color: "#3498db" };
+let newPayment = { name: "", emoji: "💳", amount: "" };
+let summaryMonth = getMonthKey(new Date());
+let deletePendingCb = null;
+
+function loadJSON(key, def) {
+  try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : def; } catch { return def; }
+}
+function saveData() {
+  localStorage.setItem("fd_categories", JSON.stringify(categories));
+  localStorage.setItem("fd_expenses", JSON.stringify(expenses));
+  localStorage.setItem("fd_budgets", JSON.stringify(budgets));
+  localStorage.setItem("fd_payments", JSON.stringify(payments));
+  localStorage.setItem("fd_payment_status", JSON.stringify(paymentStatus));
+}
+
+function getMonthKey(d) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`; }
+function formatCZK(n) {
+  if (isNaN(n) || n === null || n === undefined) return "0 Kč";
+  return new Intl.NumberFormat("cs-CZ", { style: "currency", currency: "CZK", maximumFractionDigits: 0 }).format(n);
+}
+function formatDate(str) { const d = new Date(str); return d.toLocaleDateString("cs-CZ", { day: "numeric", month: "short" }); }
+function todayStr() { return new Date().toISOString().split("T")[0]; }
+function nowTime() { return new Date().toTimeString().slice(0,5); }
+function currentMonthKey() { return getMonthKey(new Date()); }
+function getMonthExpenses(mk) { return expenses[mk] || []; }
+function getCatTotal(catId, mk) { return getMonthExpenses(mk).filter(e=>e.categoryId===catId).reduce((s,e)=>s+e.amount,0); }
+function getMonthTotal(mk) { return getMonthExpenses(mk).reduce((s,e)=>s+e.amount,0); }
+function getTodayTotal() { return getMonthExpenses(currentMonthKey()).filter(e=>e.date===todayStr()).reduce((s,e)=>s+e.amount,0); }
+function getBudget(catId) { return budgets[catId] || { enabled: false, limit: 0 }; }
+
+function getPaymentStatus(mk, pid) {
+  return (paymentStatus[mk] || {})[pid] || false;
+}
+function togglePayment(mk, pid) {
+  if (!paymentStatus[mk]) paymentStatus[mk] = {};
+  paymentStatus[mk][pid] = !paymentStatus[mk][pid];
+  saveData();
+  render();
+}
+
+// ─── RENDER ────────────────────────────────────────────────────────────────
+
+function render() {
+  updateHeader();
+  if (view === "main") {
+    if (activeTab === "vydaje") renderVydaje();
+    else if (activeTab === "platby") renderPlatby();
+    else if (activeTab === "plan") renderPlan();
+  } else if (view === "summary") renderSummary();
+  else if (view === "addCategory") renderAddCategory();
+  else if (view === "addPayment") renderAddPayment();
+}
+
+function updateHeader() {
+  const today = new Date();
+  document.getElementById("header-date").textContent = today.toLocaleDateString("cs-CZ", { day: "numeric", month: "long", year: "numeric" });
+  document.getElementById("stat-month").textContent = formatCZK(getMonthTotal(currentMonthKey()));
+  document.getElementById("stat-today").textContent = formatCZK(getTodayTotal());
+  const btn = document.getElementById("btn-summary");
+  btn.style.background = view === "summary" ? "#f0ede8" : "#2a2a35";
+  btn.style.color = view === "summary" ? "#0f0f13" : "#f0ede8";
+  // nav tabs
+  document.getElementById("nav").style.display = (view === "main") ? "flex" : "none";
+  ["vydaje","platby","plan"].forEach(t => {
+    const el = document.getElementById("tab-"+t);
+    if (el) el.className = "nav-tab" + (activeTab === t && view === "main" ? " active" : "");
+  });
+}
+
+// ─── VYDAJE ────────────────────────────────────────────────────────────────
+
+function renderVydaje() {
+  const mk = currentMonthKey();
+  const todayExpenses = getMonthExpenses(mk).filter(e => e.date === todayStr());
+  const olderExpenses = getMonthExpenses(mk).filter(e => e.date !== todayStr()).slice(0, 25);
+
+  let html = `<div class="section-label">Kategorie – klepni pro zadání</div>`;
+  html += `<div class="cat-grid">`;
+
+  categories.forEach(cat => {
+    const isActive = activeCategory && activeCategory.id === cat.id;
+    const total = getCatTotal(cat.id, mk);
+    const budget = getBudget(cat.id);
+    const bg = isActive ? cat.color : "#1a1a22";
+    const border = isActive ? cat.color : "#2a2a35";
+    const shadow = isActive ? `0 0 20px ${cat.color}55` : "none";
+    const nameColor = isActive ? "#fff" : "#f0ede8";
+    const subColor = isActive ? "rgba(255,255,255,0.8)" : "#888";
+
+    let budgetHtml = "";
+    if (budget.enabled && budget.limit > 0) {
+      const pct = Math.min((total / budget.limit) * 100, 100);
+      const remaining = budget.limit - total;
+      const over = remaining < 0;
+      const fillColor = pct >= 100 ? "#e74c3c" : pct >= 80 ? "#e67e22" : (isActive ? "rgba(255,255,255,0.7)" : cat.color);
+      const remColor = over ? "#e74c3c" : (isActive ? "rgba(255,255,255,0.85)" : "#2ecc71");
+      budgetHtml = `
+        <div class="cat-progress-wrap">
+          <div class="cat-progress-bg"><div class="cat-progress-fill" style="width:${pct}%;background:${fillColor}"></div></div>
+          <div class="cat-remaining" style="color:${remColor}">${over ? "Překročeno o " + formatCZK(Math.abs(remaining)) : "Zbývá " + formatCZK(remaining)}</div>
+        </div>`;
+    }
+
+    html += `
+      <div class="cat-card cat-btn" onclick="clickCategory('${cat.id}')"
+        style="background:${bg};border:2px solid ${border};box-shadow:${shadow}">
+        <div class="cat-emoji">${cat.emoji}</div>
+        <div class="cat-name" style="color:${nameColor}">${esc(cat.name)}</div>
+        <div class="cat-total" style="color:${subColor}">${total > 0 ? formatCZK(total) : "—"}</div>
+        ${budgetHtml}
+        <div class="cat-actions">
+          <button class="cat-action-btn" onclick="event.stopPropagation();startEditCat('${cat.id}')">✏️</button>
+          <button class="cat-action-btn" onclick="event.stopPropagation();confirmDeleteCat('${cat.id}')">🗑️</button>
+        </div>
+      </div>`;
+  });
+
+  html += `
+    <button class="add-cat-card cat-btn" onclick="openAddCategory()">
+      <div style="font-size:24px">➕</div>
+      <div style="font-size:12px;margin-top:5px">Přidat kategorii</div>
+    </button>
+  </div>`;
+
+  if (activeCategory) {
+    html += `
+    <div id="input-panel" style="border:2px solid ${activeCategory.color};box-shadow:0 0 30px ${activeCategory.color}33">
+      <div class="input-panel-header">
+        <span class="input-panel-emoji">${activeCategory.emoji}</span>
+        <span class="input-panel-name" style="color:${activeCategory.color}">${esc(activeCategory.name)}</span>
+      </div>
+      <div class="amount-wrap">
+        <input class="amount-input" id="amount-input" type="number" inputmode="decimal" placeholder="Částka"
+          style="border:1px solid ${activeCategory.color}77" onkeydown="handleAmountKey(event)" />
+        <span class="amount-unit">Kč</span>
+      </div>
+      <input class="note-input" id="note-input" type="text" placeholder="Poznámka (volitelné)" onkeydown="handleAmountKey(event)" />
+      <button class="save-btn" style="background:${activeCategory.color}" onclick="saveExpense()">ULOŽIT VÝDAJ</button>
+    </div>`;
+  }
+
+  if (todayExpenses.length > 0) {
+    html += `<div class="section-label" style="margin-top:4px">Dnešní výdaje</div>`;
+    todayExpenses.forEach(e => { html += expenseRow(e, mk, false); });
+  }
+  if (olderExpenses.length > 0) {
+    html += `<div class="section-label" style="margin-top:16px">Dříve tento měsíc</div>`;
+    olderExpenses.forEach(e => { html += expenseRow(e, mk, true); });
+  }
+  if (todayExpenses.length === 0 && olderExpenses.length === 0 && !activeCategory) {
+    html += `<div style="text-align:center;color:#555;padding:40px 0;font-size:14px">Žádné výdaje tento měsíc.<br>Klepni na kategorii výše.</div>`;
+  }
+
+  document.getElementById("content").innerHTML = html;
+  if (activeCategory) {
+    setTimeout(() => { const inp = document.getElementById("amount-input"); if (inp) inp.focus(); }, 100);
+  }
+}
+
+function expenseRow(e, mk, older) {
+  const cat = categories.find(c => c.id === e.categoryId);
+  const opacity = older ? "opacity:0.85;" : "";
+  return `
+    <div class="expense-row" style="border-left:3px solid ${cat ? cat.color : "#888"};${opacity}">
+      <span class="expense-emoji">${cat ? cat.emoji : "?"}</span>
+      <div class="expense-info">
+        <div class="expense-cat" style="color:${cat ? cat.color : "#888"}">${cat ? esc(cat.name) : "?"}</div>
+        ${older ? `<div class="expense-note">${formatDate(e.date)}${e.note ? " · " + esc(e.note) : ""}</div>` : (e.note ? `<div class="expense-note">${esc(e.note)}</div>` : "")}
+      </div>
+      <div class="expense-amount">${formatCZK(e.amount)}</div>
+      <button class="del-btn" onclick="deleteExpense('${mk}',${e.id})">✕</button>
+    </div>`;
+}
+
+// ─── PLATBY ────────────────────────────────────────────────────────────────
+
+function renderPlatby() {
+  const mk = currentMonthKey();
+  const totalSum = payments.reduce((s, p) => s + (p.amount || 0), 0);
+  const paidSum = payments.filter(p => getPaymentStatus(mk, p.id)).reduce((s, p) => s + (p.amount || 0), 0);
+  const remaining = totalSum - paidSum;
+  const paidCount = payments.filter(p => getPaymentStatus(mk, p.id)).length;
+
+  let html = `
+    <div class="payments-summary">
+      <div class="payments-summary-row">
+        <span style="color:#888;font-size:13px">Celkem závazků</span>
+        <span style="font-weight:bold">${formatCZK(totalSum)}</span>
+      </div>
+      <div class="payments-summary-row">
+        <span style="color:#2ecc71;font-size:13px">✓ Zaplaceno (${paidCount}/${payments.length})</span>
+        <span style="color:#2ecc71;font-weight:bold">${formatCZK(paidSum)}</span>
+      </div>
+      <div class="payments-summary-row">
+        <span style="color:#e67e22;font-size:13px">Zbývá zaplatit</span>
+        <span style="color:#e67e22;font-weight:bold;font-size:18px">${formatCZK(remaining)}</span>
+      </div>
+    </div>
+    <div class="section-label">Pravidelné platby – klepni pro zaškrtnutí</div>`;
+
+  // Unpaid first
+  const unpaid = payments.filter(p => !getPaymentStatus(mk, p.id));
+  const paid = payments.filter(p => getPaymentStatus(mk, p.id));
+
+  [...unpaid, ...paid].forEach(p => {
+    const isPaid = getPaymentStatus(mk, p.id);
+    html += `
+      <div class="payment-item" style="opacity:${isPaid ? 0.6 : 1}">
+        <div class="payment-check ${isPaid ? "paid" : ""}" onclick="togglePayment('${mk}','${p.id}')">
+          ${isPaid ? "✓" : ""}
+        </div>
+        <div class="payment-info">
+          <div class="payment-name" style="text-decoration:${isPaid ? "line-through" : "none"}">${p.emoji} ${esc(p.name)}</div>
+          ${p.amount ? `<div class="payment-amount">${formatCZK(p.amount)} / měsíc</div>` : `<div class="payment-amount" style="color:#555">Částka nenastavena</div>`}
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+          <div style="font-size:15px;font-weight:bold;color:${isPaid ? "#2ecc71" : "#f0ede8"}">${p.amount ? formatCZK(p.amount) : "—"}</div>
+          <div style="font-size:10px;color:${isPaid ? "#2ecc71" : "#e67e22"}">${isPaid ? "ZAPLACENO" : "ČEKÁ"}</div>
+          <div style="display:flex;gap:4px">
+            <button class="cat-action-btn" onclick="startEditPayment('${p.id}')">✏️</button>
+            <button class="cat-action-btn" onclick="confirmDeletePayment('${p.id}')">🗑️</button>
+          </div>
+        </div>
+      </div>`;
+  });
+
+  html += `
+    <button class="add-cat-card cat-btn" onclick="openAddPayment()" style="width:100%;margin-top:4px">
+      <div style="font-size:24px">➕</div>
+      <div style="font-size:12px;margin-top:5px">Přidat platbu</div>
+    </button>`;
+
+  document.getElementById("content").innerHTML = html;
+}
+
+// ─── PLÁN ──────────────────────────────────────────────────────────────────
+
+function renderPlan() {
+  const mk = currentMonthKey();
+  let html = `<div class="section-label">Finanční plán – nastav limity pro kategorie</div>`;
+
+  categories.forEach(cat => {
+    const budget = getBudget(cat.id);
+    const total = getCatTotal(cat.id, mk);
+    const pct = budget.enabled && budget.limit > 0 ? Math.min((total / budget.limit) * 100, 100) : 0;
+    const remaining = budget.limit - total;
+    const over = remaining < 0;
+    const fillColor = pct >= 100 ? "#e74c3c" : pct >= 80 ? "#e67e22" : cat.color;
+
+    html += `
+      <div style="background:#1a1a22;border-radius:14px;padding:14px 16px;margin-bottom:10px;border-left:3px solid ${cat.color}">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+          <span style="font-size:22px">${cat.emoji}</span>
+          <span style="font-weight:bold;font-size:15px;flex:1">${esc(cat.name)}</span>
+          <label class="toggle">
+            <input type="checkbox" ${budget.enabled ? "checked" : ""} onchange="toggleBudget('${cat.id}',this.checked)">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        ${budget.enabled ? `
+          <div style="margin-bottom:8px">
+            <div style="font-size:10px;color:#888;letter-spacing:2px;margin-bottom:5px;text-transform:uppercase">Měsíční limit</div>
+            <div style="position:relative">
+              <input type="number" inputmode="decimal" value="${budget.limit || ""}" placeholder="Zadej limit"
+                style="width:100%;background:#0f0f13;border:1px solid ${cat.color}55;border-radius:8px;padding:10px 40px 10px 12px;color:#f0ede8;font-size:16px;outline:none;font-family:inherit"
+                onblur="setBudgetLimit('${cat.id}',this.value)" />
+              <span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);color:#888;font-size:12px">Kč</span>
+            </div>
+          </div>
+          ${budget.limit > 0 ? `
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:11px;color:#888;margin-bottom:4px">
+                <span>${formatCZK(total)} utraceno</span>
+                <span>${formatCZK(budget.limit)} limit</span>
+              </div>
+              <div class="progress-bg">
+                <div class="progress-fill" style="width:${pct}%;background:${fillColor}"></div>
+              </div>
+              <div style="font-size:12px;margin-top:6px;color:${over ? "#e74c3c" : "#2ecc71"};font-weight:bold">
+                ${over ? "⚠️ Překročeno o " + formatCZK(Math.abs(remaining)) : "✓ Zbývá " + formatCZK(remaining)}
+              </div>
+            </div>
+          ` : ""}
+        ` : `<div style="font-size:12px;color:#555">Limit vypnutý – klepni pro zapnutí</div>`}
+      </div>`;
+  });
+
+  document.getElementById("content").innerHTML = html;
+}
+
+// ─── SUMMARY ───────────────────────────────────────────────────────────────
+
+function renderSummary() {
+  const available = Object.keys(expenses).sort().reverse();
+  if (!available.includes(summaryMonth) && available.length > 0) summaryMonth = available[0];
+  const mk = summaryMonth;
+  const allExp = getMonthExpenses(mk);
+  const total = getMonthTotal(mk);
+
+  let opts = "";
+  if (available.length === 0) opts = `<option value="${currentMonthKey()}">${currentMonthKey()}</option>`;
+  available.forEach(m => { opts += `<option value="${m}" ${m===mk?"selected":""}>${m}</option>`; });
+
+  let html = `
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+      <button class="back-btn" onclick="setView('main')">← Zpět</button>
+      <select class="month-select" onchange="summaryMonth=this.value;render()">${opts}</select>
+    </div>
+    <div class="summary-total-box">
+      <div class="summary-total-label">Celkem vydáno</div>
+      <div class="summary-total-val">${formatCZK(total)}</div>
+      <div style="font-size:12px;color:#666;margin-top:2px">${allExp.length} záznamů</div>
+    </div>
+    <div class="section-label">Podle kategorie</div>`;
+
+  categories.forEach(cat => {
+    const catTotal = getCatTotal(cat.id, mk);
+    if (catTotal === 0) return;
+    const pct = total > 0 ? (catTotal/total)*100 : 0;
+    const count = allExp.filter(e=>e.categoryId===cat.id).length;
+    const budget = getBudget(cat.id);
+    const overBudget = budget.enabled && budget.limit > 0 && catTotal > budget.limit;
+    html += `
+      <div class="cat-summary-row">
+        <div class="cat-summary-top">
+          <span style="font-size:18px;margin-right:8px">${cat.emoji}</span>
+          <div style="flex:1">
+            <span style="color:${cat.color};font-weight:bold">${esc(cat.name)}</span>
+            <span style="color:#666;font-size:11px;margin-left:6px">${count}× · ${pct.toFixed(0)}%</span>
+            ${overBudget ? `<span style="color:#e74c3c;font-size:10px;margin-left:6px">⚠️ nad limitem</span>` : ""}
+          </div>
+          <span style="font-weight:bold;font-size:16px">${formatCZK(catTotal)}</span>
+        </div>
+        <div class="progress-bg">
+          <div class="progress-fill" style="width:${pct}%;background:${cat.color}"></div>
+        </div>
+        ${budget.enabled && budget.limit > 0 ? `
+          <div style="font-size:11px;color:#666;margin-top:4px">
+            Limit: ${formatCZK(budget.limit)} · ${overBudget ? `<span style="color:#e74c3c">Překročeno o ${formatCZK(catTotal - budget.limit)}</span>` : `<span style="color:#2ecc71">Zbývá ${formatCZK(budget.limit - catTotal)}</span>`}
+          </div>` : ""}
+      </div>`;
+  });
+
+  if (allExp.length > 0) {
+    html += `<div class="section-label" style="margin-top:16px">Všechny záznamy</div>`;
+    allExp.forEach(e => {
+      const cat = categories.find(c=>c.id===e.categoryId);
+      html += `
+        <div class="all-expense-row">
+          <span style="font-size:16px;margin-right:8px">${cat?cat.emoji:"?"}</span>
+          <div style="flex:1;min-width:0">
+            <span style="font-size:13px;color:${cat?cat.color:"#888"}">${cat?esc(cat.name):"?"}</span>
+            ${e.note?`<span style="font-size:11px;color:#666;margin-left:6px">${esc(e.note)}</span>`:""}
+            <div class="all-expense-meta">${formatDate(e.date)} ${e.time||""}</div>
+          </div>
+          <span style="font-size:14px;font-weight:bold;flex-shrink:0">${formatCZK(e.amount)}</span>
+          <button class="del-btn" onclick="deleteExpense('${mk}',${e.id})">✕</button>
+        </div>`;
+    });
+  } else {
+    html += `<div style="text-align:center;color:#555;padding:40px 0">Žádné záznamy pro tento měsíc</div>`;
+  }
+
+  document.getElementById("content").innerHTML = html;
+}
+
+// ─── ADD CATEGORY ──────────────────────────────────────────────────────────
+
+function renderAddCategory() {
+  const bg = newCat.color;
+  let emojiHtml = EMOJI_OPTIONS.map(em => {
+    const sel = em === newCat.emoji;
+    return `<button class="emoji-opt" onclick="selectEmoji('${em}')" style="border-color:${sel?newCat.color:"transparent"};background:${sel?"#2a2a35":"transparent"}">${em}</button>`;
+  }).join("");
+  let colorHtml = COLOR_OPTIONS.map(col => {
+    const sel = col === newCat.color;
+    return `<div class="color-dot" onclick="selectColor('${col}')" style="background:${col};border-color:${sel?"#fff":"transparent"}"></div>`;
+  }).join("");
+  const canSave = newCat.name.trim().length > 0;
+  const title = editingCategoryId ? "Upravit kategorii" : "Nová kategorie";
+
+  document.getElementById("content").innerHTML = `
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px">
+      <button class="back-btn" onclick="cancelAddCategory()">← Zpět</button>
+      <span style="font-weight:bold">${title}</span>
+    </div>
+    <div class="preview-card" style="background:${bg};box-shadow:0 0 20px ${bg}55">
+      <div style="font-size:32px">${newCat.emoji}</div>
+      <div id="cat-preview-name" style="font-size:14px;font-weight:bold;color:#fff;margin-top:4px">${esc(newCat.name)||"Název..."}</div>
+    </div>
+    <div style="margin-bottom:14px">
+      <div class="form-label">Název</div>
+      <input class="form-input" id="cat-name-input" type="text" placeholder="Název kategorie" value="${esc(newCat.name)}"
+        oninput="newCat.name=this.value;updateCatPreview()"
+        onblur="newCat.name=this.value" />
+    </div>
+    <div style="margin-bottom:14px">
+      <div class="form-label">Ikona</div>
+      <div class="emoji-grid">${emojiHtml}</div>
+    </div>
+    <div style="margin-bottom:24px">
+      <div class="form-label">Barva</div>
+      <div class="color-grid">${colorHtml}</div>
+    </div>
+    <button class="submit-btn" onclick="submitCategory()" style="background:${canSave?newCat.color:"#2a2a35"};opacity:${canSave?1:0.6}">
+      ${editingCategoryId ? "ULOŽIT ZMĚNY" : "PŘIDAT KATEGORII"}
+    </button>`;
+}
+
+// ─── ADD PAYMENT ───────────────────────────────────────────────────────────
+
+const PAYMENT_EMOJIS = ["🏠","⚡","📱","🌐","💳","🏦","🚰","🔥","📺","🚗","🏥","📚","🎓","⚖️","💰"];
+
+function renderAddPayment() {
+  const isEdit = !!editingPaymentId;
+  let emojiHtml = PAYMENT_EMOJIS.map(em => {
+    const sel = em === newPayment.emoji;
+    return `<button class="emoji-opt" onclick="selectPaymentEmoji('${em}')" style="border-color:${sel?"#3498db":"transparent"};background:${sel?"#2a2a35":"transparent"}">${em}</button>`;
+  }).join("");
+
+  document.getElementById("content").innerHTML = `
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px">
+      <button class="back-btn" onclick="cancelAddPayment()">← Zpět</button>
+      <span style="font-weight:bold">${isEdit ? "Upravit platbu" : "Nová platba"}</span>
+    </div>
+    <div style="background:#1a1a22;border-radius:14px;padding:16px;margin-bottom:16px;display:flex;align-items:center;gap:12px">
+      <span style="font-size:32px" id="pay-preview-emoji">${newPayment.emoji}</span>
+      <div>
+        <div style="font-weight:bold;font-size:16px" id="pay-preview-name">${esc(newPayment.name)||"Název..."}</div>
+        <div style="font-size:13px;color:#888;margin-top:2px" id="pay-preview-amount">${newPayment.amount ? formatCZK(parseFloat(newPayment.amount)) : "Částka nenastavena"}</div>
+      </div>
+    </div>
+    <div style="margin-bottom:14px">
+      <div class="form-label">Název platby</div>
+      <input class="form-input" id="pay-name-input" type="text" placeholder="Nájem, elektrika..." value="${esc(newPayment.name)}"
+        oninput="updatePayPreviewName(this.value)"
+        onblur="newPayment.name=this.value" />
+    </div>
+    <div style="margin-bottom:14px">
+      <div class="form-label">Měsíční částka (volitelné)</div>
+      <div style="position:relative">
+        <input class="form-input" id="pay-amount-input" type="number" inputmode="decimal" placeholder="0"
+          value="${newPayment.amount||""}"
+          style="padding-right:40px"
+          oninput="updatePayPreviewAmount(this.value)"
+          onblur="newPayment.amount=this.value" />
+        <span style="position:absolute;right:14px;top:50%;transform:translateY(-50%);color:#888;font-size:13px">Kč</span>
+      </div>
+    </div>
+    <div style="margin-bottom:24px">
+      <div class="form-label">Ikona</div>
+      <div class="emoji-grid">${emojiHtml}</div>
+    </div>
+    <button class="submit-btn" id="pay-submit-btn" onclick="submitPayment()"
+      style="background:${newPayment.name.trim()?"#3498db":"#2a2a35"};opacity:${newPayment.name.trim()?1:0.6}">
+      ${isEdit ? "ULOŽIT ZMĚNY" : "PŘIDAT PLATBU"}
+    </button>`;
+}
+
+function updatePayPreviewName(val) {
+  newPayment.name = val;
+  const el = document.getElementById("pay-preview-name");
+  if (el) el.textContent = val || "Název...";
+  const btn = document.getElementById("pay-submit-btn");
+  if (btn) {
+    btn.style.background = val.trim() ? "#3498db" : "#2a2a35";
+    btn.style.opacity = val.trim() ? "1" : "0.6";
+  }
+}
+
+function updatePayPreviewAmount(val) {
+  newPayment.amount = val;
+  const el = document.getElementById("pay-preview-amount");
+  if (el) {
+    const num = parseFloat(val);
+    el.textContent = (!isNaN(num) && num > 0) ? formatCZK(num) : "Částka nenastavena";
+  }
+}
+
+// ─── ACTIONS ───────────────────────────────────────────────────────────────
+
+function switchTab(tab) {
+  activeTab = tab;
+  activeCategory = null;
+  view = "main";
+  render();
+}
+
+function clickCategory(id) {
+  const cat = categories.find(c=>c.id===id);
+  if (!cat) return;
+  activeCategory = (activeCategory && activeCategory.id === id) ? null : cat;
+  render();
+}
+
+function handleAmountKey(e) { if (e.key === "Enter") saveExpense(); }
+
+function saveExpense() {
+  if (!activeCategory) return;
+  const inp = document.getElementById("amount-input");
+  const noteInp = document.getElementById("note-input");
+  if (!inp) return;
+  const amount = parseFloat(inp.value.replace(",","."));
+  if (!amount || amount <= 0) { inp.focus(); return; }
+  const note = noteInp ? noteInp.value.trim() : "";
+  const mk = currentMonthKey();
+  const entry = { id: Date.now(), categoryId: activeCategory.id, amount, note, date: todayStr(), time: nowTime() };
+  if (!expenses[mk]) expenses[mk] = [];
+  expenses[mk].unshift(entry);
+  saveData();
+  activeCategory = null;
+  render();
+  const ov = document.getElementById("success-overlay");
+  ov.classList.remove("show");
+  void ov.offsetWidth;
+  ov.classList.add("show");
+  setTimeout(() => ov.classList.remove("show"), 850);
+}
+
+function deleteExpense(mk, id) {
+  if (!expenses[mk]) return;
+  expenses[mk] = expenses[mk].filter(e => e.id !== id);
+  saveData();
+  render();
+}
+
+function toggleBudget(catId, enabled) {
+  if (!budgets[catId]) budgets[catId] = { enabled: false, limit: 0 };
+  budgets[catId].enabled = enabled;
+  saveData();
+  render();
+}
+
+function setBudgetLimit(catId, val) {
+  const num = parseFloat(val);
+  if (!budgets[catId]) budgets[catId] = { enabled: true, limit: 0 };
+  budgets[catId].limit = isNaN(num) ? 0 : num;
+  saveData();
+  render();
+}
+
+function toggleSummary() { setView(view === "summary" ? "main" : "summary"); }
+function setView(v) { view = v; activeCategory = null; render(); }
+
+function openAddCategory() {
+  editingCategoryId = null;
+  newCat = { name: "", emoji: "🛒", color: "#3498db" };
+  view = "addCategory";
+  render();
+}
+function cancelAddCategory() { editingCategoryId = null; view = "main"; render(); }
+
+function startEditCat(id) {
+  const cat = categories.find(c=>c.id===id);
+  if (!cat) return;
+  editingCategoryId = id;
+  newCat = { name: cat.name, emoji: cat.emoji, color: cat.color };
+  view = "addCategory";
+  render();
+}
+
+function selectEmoji(em) { newCat.emoji = em; renderAddCategory(); }
+function selectColor(col) { newCat.color = col; renderAddCategory(); }
+
+function updateCatPreview() {
+  const previewName = document.getElementById("cat-preview-name");
+  if (previewName) previewName.textContent = newCat.name || "Název...";
+  const btn = document.querySelector(".submit-btn");
+  if (btn) {
+    btn.style.background = newCat.name.trim() ? newCat.color : "#2a2a35";
+    btn.style.opacity = newCat.name.trim() ? "1" : "0.6";
+  }
+}
+
+function submitCategory() {
+  if (!newCat.name.trim()) return;
+  if (editingCategoryId) {
+    categories = categories.map(c => c.id === editingCategoryId ? { ...c, name: newCat.name.trim(), emoji: newCat.emoji, color: newCat.color } : c);
+    editingCategoryId = null;
+  } else {
+    categories.push({ id: Date.now().toString(), name: newCat.name.trim(), emoji: newCat.emoji, color: newCat.color });
+  }
+  saveData();
+  newCat = { name: "", emoji: "🛒", color: "#3498db" };
+  view = "main";
+  render();
+}
+
+function confirmDeleteCat(id) {
+  deletePendingCb = () => {
+    categories = categories.filter(c=>c.id!==id);
+    saveData();
+    closeModal();
+    render();
+  };
+  document.getElementById("modal-icon").textContent = "⚠️";
+  document.getElementById("modal-text").innerHTML = "Smazat kategorii?<br><span style='font-size:12px;color:#888'>Výdaje zůstanou uloženy.</span>";
+  document.getElementById("modal-confirm-btn").textContent = "Smazat";
+  document.getElementById("modal-confirm-btn").onclick = deletePendingCb;
+  document.getElementById("modal").classList.add("show");
+}
+
+// Payment actions
+function openAddPayment() {
+  editingPaymentId = null;
+  newPayment = { name: "", emoji: "💳", amount: "" };
+  view = "addPayment";
+  render();
+}
+function cancelAddPayment() { editingPaymentId = null; view = "main"; render(); }
+
+function startEditPayment(id) {
+  const p = payments.find(p=>p.id===id);
+  if (!p) return;
+  editingPaymentId = id;
+  newPayment = { name: p.name, emoji: p.emoji, amount: p.amount ? String(p.amount) : "" };
+  view = "addPayment";
+  render();
+}
+
+function selectPaymentEmoji(em) { newPayment.emoji = em; renderAddPayment(); }
+
+function submitPayment() {
+  if (!newPayment.name.trim()) return;
+  const amount = parseFloat(newPayment.amount) || 0;
+  if (editingPaymentId) {
+    payments = payments.map(p => p.id === editingPaymentId ? { ...p, name: newPayment.name.trim(), emoji: newPayment.emoji, amount } : p);
+    editingPaymentId = null;
+  } else {
+    payments.push({ id: Date.now().toString(), name: newPayment.name.trim(), emoji: newPayment.emoji, amount });
+  }
+  saveData();
+  newPayment = { name: "", emoji: "💳", amount: "" };
+  view = "main";
+  activeTab = "platby";
+  render();
+}
+
+function confirmDeletePayment(id) {
+  deletePendingCb = () => {
+    payments = payments.filter(p=>p.id!==id);
+    saveData();
+    closeModal();
+    render();
+  };
+  document.getElementById("modal-icon").textContent = "🗑️";
+  document.getElementById("modal-text").innerHTML = "Smazat tuto platbu?";
+  document.getElementById("modal-confirm-btn").textContent = "Smazat";
+  document.getElementById("modal-confirm-btn").onclick = deletePendingCb;
+  document.getElementById("modal").classList.add("show");
+}
+
+function closeModal() {
+  document.getElementById("modal").classList.remove("show");
+  deletePendingCb = null;
+}
+
+function esc(s) {
+  if (!s) return "";
+  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+render();
+</script>
+</body>
+</html>
